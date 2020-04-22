@@ -148,6 +148,7 @@ export function activate(context: vscode.ExtensionContext) {
     clangdClient.registerFeature(semanticHighlightingFeature);
   }
   clangdClient.registerFeature(new EnableEditsNearCursorFeature);
+  clangdClient.registerProposedFeatures();
   console.log('Clang Language Server is now active!');
   context.subscriptions.push(clangdClient.start());
   context.subscriptions.push(vscode.commands.registerCommand(
