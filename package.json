@@ -2,7 +2,7 @@
     "name": "vscode-clangd",
     "displayName": "clangd",
     "description": "C and C++ completion, navigation, and insights",
-    "version": "0.0.24",
+    "version": "0.1.24",
     "publisher": "llvm-vs-code-extensions",
     "homepage": "https://clangd.llvm.org/",
     "icon": "icon.png",
@@ -41,8 +41,8 @@
     },
     "dependencies": {
         "jsonc-parser": "^2.1.0",
-        "vscode-languageclient": "6.1.0",
-        "vscode-languageserver-types": "^3.15.1"
+        "vscode-languageclient": "6.2.0-next.2",
+        "vscode-languageserver-types": "^3.16.0-next.1"
     },
     "devDependencies": {
         "@types/glob": "^7.1.1",
@@ -108,7 +108,9 @@
                 "clangd.fallbackFlags": {
                     "type": "array",
                     "default": [],
-                    "items": { "type": "string" },
+                    "items": {
+                        "type": "string"
+                    },
                     "description": "Extra clang flags used to parse files when no compilation database is found."
                 }
             }
