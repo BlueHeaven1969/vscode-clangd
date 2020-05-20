@@ -1,18 +1,11 @@
 import * as vscode from 'vscode';
 import * as vscodelc from 'vscode-languageclient';
+
+import * as config from './config';
 import * as fileStatus from './file-status';
+import * as install from './install';
 import * as semanticHighlighting from './semantic-highlighting';
 import * as switchSourceHeader from './switch-source-header';
-
-/**
- * Get an option from workspace configuration.
- * @param option name of the option (e.g. for clangd.path should be path)
- * @param defaultValue default value to return if option is not set
- */
-function getConfig<T>(option: string, defaultValue?: any): T {
-  const config = vscode.workspace.getConfiguration('clangd');
-  return config.get<T>(option, defaultValue);
-}
 
 class ClangdLanguageClient extends vscodelc.LanguageClient {
   // Override the default implementation for failed requests. The default
@@ -44,12 +37,16 @@ class EnableEditsNearCursorFeature implements vscodelc.StaticFeature {
  *  This method is called when the extension is activated. The extension is
  *  activated the very first time a command is executed.
  */
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
+  const clangdPath = await install.activate(context);
+  if (!clangdPath)
+    return;
+
   const clangd: vscodelc.Executable = {
-    command: getConfig<string>('path'),
-    args: getConfig<string[]>('arguments')
+    command: clangdPath,
+    args: config.get<string[]>('arguments')
   };
-  const traceFile = getConfig<string>('trace');
+  const traceFile = config.get<string>('trace');
   if (!!traceFile) {
     const trace = {CLANGD_TRACE: traceFile};
     clangd.options = {env: {...process.env, ...trace}};
@@ -68,7 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
     ],
     initializationOptions: {
       clangdFileStatus: true,
-      fallbackFlags: getConfig<string[]>('fallbackFlags')
+      fallbackFlags: config.get<string[]>('fallbackFlags')
     },
     // Do not switch to output window when clangd returns output.
     revealOutputChannelOn: vscodelc.RevealOutputChannelOn.Never,
@@ -105,7 +102,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   const client = new ClangdLanguageClient('Clang Language Server',
                                           serverOptions, clientOptions);
-  if (getConfig<boolean>('semanticHighlighting'))
+  if (config.get<boolean>('semanticHighlighting'))
     semanticHighlighting.activate(client, context);
   client.registerFeature(new EnableEditsNearCursorFeature);
   client.registerProposedFeatures();
